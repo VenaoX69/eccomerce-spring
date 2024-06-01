@@ -3,6 +3,7 @@ package com.curso.ecommerce.controller;
 import org.slf4j.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.curso.ecommerce.model.Producto;
 import com.curso.ecommerce.model.Usuario;
 import com.curso.ecommerce.service.ProductoService;
+
+
 
 @Controller // Le indicamos al programa que esto va ser un controlador para que se pueda inyectar.
 @RequestMapping("/productos") // Mapeado el controlador en la carpeta 'productos' que se encuentra en templates.
@@ -24,7 +27,8 @@ public class ProductoController {
 	private ProductoService productoService;
 	
 	@GetMapping("") // Se hace uso de esto para que se mapee correctamente a 'productos'.
-	public String show() {
+	public String show(Model model) { // El 'Model' nos permite llevar información del Backen hacia la vista.
+		model.addAttribute("productos", productoService.findAll()); // Se le indica al programa el nombre 'productos' y va a tener el metodo 'findAll()' del archivo 'ProductoService'.
 		return "productos/show";
 	}
 	

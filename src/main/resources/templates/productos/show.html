@@ -52,11 +52,12 @@
       </tr>
     </thead>
     <tbody>
-      <tr>
-        <td ></td>
-        <td ></td>
-        <td ></td>
-        <td ></td>
+		<!-- Para mostrar información desde el backend, debemos asegurarnos de tener el 'thymeleaf'' -->
+      <tr th:each="producto:${productos}"> <!-- La sentencia 'th:each' que le permite a la aplicación recorrer una lista string,int etc. cualquier lista -->
+        <td th:text="${producto.nombre}"></td> <!-- Dentro del 'each' le decimos que en una variable'producto' va a obtener':' lo que se ha enviado al backend '{productos}' que se definio en el 'ProductoController', es el iterador.  -->
+        <td th:text="${producto.descripcion}"></td> <!-- Para selecionar lo que la aplicación debe mostrar, se debe hacer uso del 'th:formato' y para poder accerder a la variable de hace uso del'${}', ya lo siguiente es seleccionar el campo que se quiere mostrar, ejemplo ''  -->
+        <td th:text="${producto.cantidad}"></td>
+        <td th:text="${producto.precio}"></td>
         <td><a  class="btn btn-warning" href="">Editar</a> </td>
         <td><a  class="btn btn-danger" href="">Eliminar</a> </td>
       </tr>       
