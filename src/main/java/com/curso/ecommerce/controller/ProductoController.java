@@ -1,5 +1,6 @@
 package com.curso.ecommerce.controller;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import org.slf4j.*;
@@ -10,10 +11,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.curso.ecommerce.model.Producto;
 import com.curso.ecommerce.model.Usuario;
 import com.curso.ecommerce.service.ProductoService;
+import com.curso.ecommerce.service.UploadFileService;
 
 
 
@@ -28,6 +32,10 @@ public class ProductoController {
 	// Se hace uso de '@Autowired' para que spring se encargue instanciar el motodo en el contenedor y no tener que hacerlo manualmente.
 	@Autowired
 	private ProductoService productoService;
+	
+	@Autowired // Esto es para inyectarla a la clase en la que esta'ProductoController'.
+	// Para agregar una imagenes se crea una variable privada de tipo 'UploadFileService' que es la clase donde estan lo metodos.
+	private UploadFileService upload;
 	
 	@GetMapping("") // Se hace uso de esto para que se mapee correctamente a 'productos'.
 	public String show(Model model) { // El 'Model' nos permite llevar información del Backen hacia la vista.
@@ -45,7 +53,7 @@ public class ProductoController {
 	// Metodos para recibir y postear los datos ingresados desde la template 'create' hacia la tabla de 'Producto' en la base de datos.
 	// El objecto va a pertenecer a un tipo '@PostMaping'
 	@PostMapping("/save") // Mapeamos el metodo como 'save', pero ese nombre puede variar según la necesidad.
-	public String save(Producto producto) {
+	public String save(Producto producto,@RequestParam("img") MultipartFile file) throws IOException { // En el parametro 'MultipartFile file' se hace uso de la anotación propia de Spring '@RequestParam' donde se especificá de donde se está cargando la imagen, que en este caso la podemos encontrar en la template 'cretae.html' en parte de name="img".
 		LOGGER.info("Este es el objecto 'Producto' de la vista {}", producto); // El uso del {} es para indicarle al programa que acontinuación va a venir una variable o a su vez sea un objecto.
 		
 		// Antes del guardado, debemos instanciar el usuario.
@@ -53,6 +61,26 @@ public class ProductoController {
 		
 		// Le indicamos al programa que usuario 'u' debe agregar al campo de 'usuario' en la tabla 'Producto', 
 		producto.setUsuario(u);
+		
+		// Lógica para subir la 'imagen' al servidor y guardar el nombre en la DB y en la tabla productos.
+		// Vamos hacer validación para guardar la imagen de varia formas:
+		if (producto.getId()==null) { // En la primera validación se va hacer cuando la imagen sea ingresada por 'primera vez' (Se crea el producto).
+			String nombreImagen = upload.saveImage(file); // Recordar colocar el parametro 'file' en el constructor.
+										// Se debe hacer uso una excepción para que funcione el 'upload.saveImage(file).
+		
+			producto.setImagen(nombreImagen); // Se le especificá al programa que al campo 'Image' del 'Producto' se le va agregar el 'nombre de la imagen'
+		}else { // Lógica por si el producto ya existe y se necesitá editar, aquí existen 2 casos cuando se edite un producto pero se cargué la misma imagen o se cargué una diferente.
+			if (file.isEmpty()) { // Primer caso, cuando se edite el producto pero se cargue la misma imagen.
+				Producto p = new Producto();
+				p = productoService.get(producto.getId()).get(); // El programa buscará el producto atraves del 'productoService', donde obtendrá el producto.
+				producto.setImagen(p.getImagen()); // Se obtine la misma imagen y se le pasa al producto. 
+			}else { // Caso en que se quiera editar la imagen con el producto
+				String nombreImagen = upload.saveImage(file); // Recordar colocar el parametro 'file' en el constructor.
+				// Se debe hacer uso una excepción para que funcione el 'upload.saveImage(file).
+			}
+		}
+		
+		
 		
 		productoService.save(producto); // Hacemos uso del metodo 'save()' creado en el paquete 'service' en el archivo interfaz 'ProductoService.java'
 		
@@ -89,4 +117,6 @@ public class ProductoController {
 		productoService.delate(id);
 		return "redirect:/productos";
 	}
+	
+	// Lógica para subir la imagen y ponerle nombre.
 }
