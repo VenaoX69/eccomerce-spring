@@ -58,7 +58,7 @@
         <td th:text="${producto.descripcion}"></td> <!-- Para selecionar lo que la aplicación debe mostrar, se debe hacer uso del 'th:formato' y para poder accerder a la variable de hace uso del'${}', ya lo siguiente es seleccionar el campo que se quiere mostrar, ejemplo ''  -->
         <td th:text="${producto.cantidad}"></td>
         <td th:text="${producto.precio}"></td>
-        <td><a  class="btn btn-warning" href="">Editar</a> </td>
+        <td><a  class="btn btn-warning" th:href="@{productos/edit/{id} (id=${producto.id})}">Editar</a> </td> <!-- El programa ira a buscar en el controlador 'productos' donde haremos uso del metodo 'edit' y le pasaremos un parametro que en este caso es id -->
         <td><a  class="btn btn-danger" href="">Eliminar</a> </td>
       </tr>       
     </tbody>

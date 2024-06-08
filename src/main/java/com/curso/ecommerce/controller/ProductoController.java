@@ -1,10 +1,13 @@
 package com.curso.ecommerce.controller;
 
+import java.util.Optional;
+
 import org.slf4j.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -57,4 +60,33 @@ public class ProductoController {
 		// NOTA: Debemos verificar que en la clase de producto, se encuentre el To_String()
 	}
 	
+	// Metodo para editar el 'producto'.
+	@GetMapping("edit/{id}") // Se obtiene un mapeo de la template 'edit' y se indica al programa que va a recibir un campo de tipo id.
+	public String edit(@PathVariable Integer id, Model model) { // Se declara una variable para poder recibir el 'id', y anteponemos la anotación '@PathVariable' que es propia de spring para pasarle el id que se necesita desde el '@GetMapping', uso del 'Model' para mostrar información.
+		Producto producto = new Producto(); // En esta variable el sistema va a guardar el objecto buscado.
+		Optional<Producto> optionalProducto=productoService.get(id); // Esto es lo que devuelve cuando se hace una consulta de un tipo producto.
+		producto = optionalProducto.get(); // Esta linea permite obtener el como tal el producto que se mando a buscar.
+		
+		// Vamos a verificar que se este obteniendo correctamente el 'producto'.
+		LOGGER.info("Producto buscado: {}", producto); // Se le pasa la variable con el 'producto' para que se muestre en la consola.
+		
+		//
+		model.addAttribute("producto", producto);
+		
+		return "productos/edit";
+	}
+	
+	@PostMapping("/updated")
+	public String updated(Producto producto) {
+		productoService.update(producto);
+		return "redirect:/productos";
+	}
+	
+	
+	// Metodo para eliminar un producto.
+	@GetMapping("delete/{id}") // Se le indica al programa 
+	public String delete(@PathVariable Integer id) {
+		productoService.delate(id);
+		return "redirect:/productos";
+	}
 }
