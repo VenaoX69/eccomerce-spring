@@ -69,18 +69,9 @@ public class ProductoController {
 										// Se debe hacer uso una excepción para que funcione el 'upload.saveImage(file).
 		
 			producto.setImagen(nombreImagen); // Se le especificá al programa que al campo 'Image' del 'Producto' se le va agregar el 'nombre de la imagen'
-		}else { // Lógica por si el producto ya existe y se necesitá editar, aquí existen 2 casos cuando se edite un producto pero se cargué la misma imagen o se cargué una diferente.
-			if (file.isEmpty()) { // Primer caso, cuando se edite el producto pero se cargue la misma imagen.
-				Producto p = new Producto();
-				p = productoService.get(producto.getId()).get(); // El programa buscará el producto atraves del 'productoService', donde obtendrá el producto.
-				producto.setImagen(p.getImagen()); // Se obtine la misma imagen y se le pasa al producto. 
-			}else { // Caso en que se quiera editar la imagen con el producto
-				String nombreImagen = upload.saveImage(file); // Recordar colocar el parametro 'file' en el constructor.
-				// Se debe hacer uso una excepción para que funcione el 'upload.saveImage(file).
-			}
+		}else {
+			
 		}
-		
-		
 		
 		productoService.save(producto); // Hacemos uso del metodo 'save()' creado en el paquete 'service' en el archivo interfaz 'ProductoService.java'
 		
@@ -105,15 +96,43 @@ public class ProductoController {
 	}
 	
 	@PostMapping("/updated")
-	public String updated(Producto producto) {
+	public String updated(Producto producto, @RequestParam("img") MultipartFile file) throws IOException {
+		
+		// Obtener usuario de edicion del producto:
+		Producto p = new Producto(); 
+		productoService.get(producto.getId()).get(); // El programa buscará el producto atraves del 'productoService', donde obtendrá el producto.
+		
+		// Lógica por si el producto ya existe y se necesitá editar, aquí existen 2 casos cuando se edite un producto pero se cargué la misma imagen o se cargué una diferente.
+		if (file.isEmpty()) { // Primer caso, cuando se edite el producto pero se cargue la misma imagen.
+
+			producto.setImagen(p.getImagen()); // Se obtine la misma imagen y se le pasa al producto. 
+		}else { // Caso en que se quiera editar la imagen con el producto
+			// Eliminar la imagen del servidor y proyecto:
+			if (!p.getImagen().equals("default.jpg")) { // Se hace un if para que no eliminé la imagen por defecto.
+				upload.deleteImage(p.getImagen());
+			}
+			
+			String nombreImagen = upload.saveImage(file); // Recordar colocar el parametro 'file' en el constructor.
+			// Se debe hacer uso una excepción para que funcione el 'upload.saveImage(file).
+			producto.setImagen(nombreImagen);
+		}
+		producto.setUsuario(p.getUsuario());
+		
 		productoService.update(producto);
 		return "redirect:/productos";
 	}
 	
 	
 	// Metodo para eliminar un producto.
-	@GetMapping("delete/{id}") // Se le indica al programa 
+	@GetMapping("/delete/{id}") // Se le indica al programa 
 	public String delete(@PathVariable Integer id) {
+		// Eliminar la imagen del servidor y proyecto:
+		Producto p = new Producto();
+		p = productoService.get(id).get();
+		if (!p.getImagen().equals("default.jpg")) { // Se hace un if para que no eliminé la imagen por defecto.
+			upload.deleteImage(p.getImagen());
+		}
+		
 		productoService.delate(id);
 		return "redirect:/productos";
 	}

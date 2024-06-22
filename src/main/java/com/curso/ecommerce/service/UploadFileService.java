@@ -18,7 +18,7 @@ public class UploadFileService {
 	
 	// Creación del método agregar:
 	public String saveImage(MultipartFile file) throws IOException { // Se le agrega como parametro un tipo de 'MultipartFile'.
-		if (file.isEmpty()) { // Aquí se hace una validación de 'si' el parametro 'file' viene con con contenido.
+		if (!file.isEmpty()) { // Aquí se hace una validación de 'si' el parametro 'file' viene con con contenido.
 			// Se pasará la imagen a 'bytes' para que se pueda enviarse desde el cliente al servidor, es decir vamos a convertir la imagen en 0 y 1 para que se pueda enviar de un lado a otro.
 			byte [] bytes = file.getBytes(); // Tenemos que hacer una captura de excepción en caso que la haya.
 			Path path = Paths.get(folder+file.getOriginalFilename()); // Se le indicá al programa que va a guadar la imagen en la carpeta del path que se creó.
